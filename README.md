@@ -125,7 +125,7 @@ Error responses include a message explaining the error:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/property-prices-mcp.git
+   git clone https://github.com/joemclo/property-prices-mcp.git
    cd property-prices-mcp
    ```
 
