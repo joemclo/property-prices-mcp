@@ -52,7 +52,7 @@ const TEST_CASES: TestCase[] = [
     },
     validate: result => {
       const errors = [];
-      if (!result.properties?.every((p: any) => p.propertyType.includes('flat-maisonette'))) {
+      if (!result.properties?.every((p: any) => p.propertyType === 'flat')) {
         errors.push('Non-flat properties found in results');
       }
       return errors;
@@ -152,7 +152,7 @@ const TEST_CASES: TestCase[] = [
       if (
         !result.properties?.every(
           (p: any) =>
-            p.propertyType.includes('flat-maisonette') &&
+            p.propertyType === 'flat' &&
             p.price >= 300000 &&
             p.price <= 500000 &&
             new Date(p.date) >= new Date('2023-01-01')
