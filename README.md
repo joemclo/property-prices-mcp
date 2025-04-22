@@ -55,6 +55,18 @@ const result = await client.resource('property-prices').query({
 console.log(result);
 ```
 
+## Usage Notes
+
+### Case Sensitivity
+
+The UK Land Registry data is case-sensitive for street names and city names. However, this MCP automatically converts these parameters to uppercase before sending to the Land Registry API, so you can use any case in your searches.
+
+Example:
+
+```
+"Cherry Drive" and "CHERRY DRIVE" will both work correctly.
+```
+
 ## Search Parameters
 
 The server accepts the following search parameters:

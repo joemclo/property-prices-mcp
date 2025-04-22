@@ -18,13 +18,15 @@ export function getPostcodeQuery(postcode: string): string {
     
     SELECT ?amount ?date ?paon ?saon ?street ?town ?county ?postcode ?propertyType ?estateType ?newBuild ?category
     WHERE {
+      VALUES ?postcode {"${postcode.replace(/"/g, '\\"')}"^^xsd:string}
+      
       ?transx lrppi:propertyAddress ?addr ;
               lrppi:pricePaid ?amount ;
               lrppi:transactionDate ?date ;
               lrppi:propertyType ?propertyType ;
               lrppi:transactionCategory/skos:prefLabel ?category .
               
-      ?addr lrcommon:postcode "${postcode.replace(/"/g, '\\"')}" .
+      ?addr lrcommon:postcode ?postcode .
       
       OPTIONAL { ?addr lrcommon:paon ?paon }
       OPTIONAL { ?addr lrcommon:saon ?saon }
@@ -97,8 +99,11 @@ export function getAddressQuery(
     SELECT ?paon ?saon ?street ?town ?county ?postcode ?amount ?date ?category ?propertyType ?estateType ?newBuild
     WHERE
     {
-      ?addr lrcommon:street "${streetName.replace(/"/g, '\\"')}"^^xsd:string ;
-            lrcommon:town "${city.replace(/"/g, '\\"')}"^^xsd:string .
+      VALUES ?street {"${streetName.replace(/"/g, '\\"')}"^^xsd:string}
+      VALUES ?town {"${city.replace(/"/g, '\\"')}"^^xsd:string}
+      
+      ?addr lrcommon:street ?street ;
+            lrcommon:town ?town .
   `;
 
   if (houseNumber) {

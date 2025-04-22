@@ -1,6 +1,7 @@
 import 'isomorphic-fetch';
 import { SearchParams, SearchResponse, PropertyPrice, PropertyType } from '../models/types.js';
 import { getPostcodeQuery, getAddressQuery, addDateFilters } from '../queries/queries.js';
+import { logSparqlRequest, logSparqlResponse, logSparqlError, logInfo } from '../utils/logger.js';
 
 interface SparqlBinding {
   amount?: { value: string };
@@ -29,22 +30,75 @@ export async function querySparql(endpoint: string, query: string): Promise<Spar
   params.append('query', query);
   const body = params.toString();
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/sparql-results+json',
-    },
-    body,
-  });
+  const startTime = Date.now();
+  let responseStatus = 0;
+  let responseTime = 0;
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`HTTP error ${response.status}: ${text}`);
+  try {
+    // Log the SPARQL request
+    logSparqlRequest('SPARQL request sent', {
+      endpoint,
+      query,
+    });
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/sparql-results+json',
+      },
+      body,
+    });
+
+    responseStatus = response.status;
+    responseTime = Date.now() - startTime;
+
+    if (!response.ok) {
+      const text = await response.text();
+      const errorMessage = `HTTP error ${response.status}: ${text}`;
+
+      // Log the error
+      logSparqlError('SPARQL request failed', {
+        endpoint,
+        query,
+        responseStatus,
+        responseTime,
+        error: errorMessage,
+      });
+
+      throw new Error(errorMessage);
+    }
+
+    const data = (await response.json()) as SparqlResponse;
+
+    // Extract a sample binding for logging purposes
+    const sampleBinding = data.results.bindings.length > 0 ? data.results.bindings[0] : null;
+
+    // Log the successful response with sample data
+    logSparqlResponse('SPARQL response received', {
+      endpoint,
+      query,
+      responseStatus,
+      responseTime,
+      resultCount: data.results.bindings.length,
+      sampleRawData: sampleBinding ? JSON.stringify(sampleBinding) : 'No results',
+    });
+
+    return data.results.bindings;
+  } catch (error) {
+    responseTime = Date.now() - startTime;
+
+    // Log any other errors that might occur
+    logSparqlError('SPARQL request failed with exception', {
+      endpoint,
+      query,
+      responseStatus,
+      responseTime,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    throw error;
   }
-
-  const data = (await response.json()) as SparqlResponse;
-  return data.results.bindings;
 }
 
 function mapPropertyType(propertyTypeUri: string): PropertyType {
@@ -114,40 +168,70 @@ export async function searchProperties(
     throw new Error('limit must be positive');
   }
 
+  // Normalize street and city to uppercase for SPARQL queries
+  // (Land Registry data appears to be case-sensitive)
+  const normalizedParams = { ...params };
+  if (normalizedParams.street) {
+    normalizedParams.street = normalizedParams.street.toUpperCase();
+  }
+  if (normalizedParams.city) {
+    normalizedParams.city = normalizedParams.city.toUpperCase();
+  }
+
   let query: string;
 
-  if (params.postcode) {
-    query = getPostcodeQuery(params.postcode);
+  if (normalizedParams.postcode) {
+    query = getPostcodeQuery(normalizedParams.postcode);
   } else {
-    query = getAddressQuery(params.street!, params.city!);
+    query = getAddressQuery(normalizedParams.street!, normalizedParams.city!);
   }
 
   // Add date filters if provided
-  if (params.fromDate || params.toDate) {
-    query = addDateFilters(query, params.fromDate, params.toDate);
+  if (normalizedParams.fromDate || normalizedParams.toDate) {
+    query = addDateFilters(query, normalizedParams.fromDate, normalizedParams.toDate);
   }
 
   const results = await querySparql(endpoint, query);
   const properties = results.map(parsePropertyPrice);
 
+  // Log a sample of the parsed properties to diagnose street/city issues
+  if (properties.length > 0) {
+    logInfo('Sample parsed property data', {
+      searchType: normalizedParams.postcode ? 'postcode' : 'street/city',
+      searchParams: {
+        postcode: normalizedParams.postcode,
+        street: normalizedParams.street,
+        city: normalizedParams.city,
+      },
+      firstProperty: {
+        price: properties[0].price,
+        date: properties[0].date,
+        postcode: properties[0].postcode,
+        propertyType: properties[0].propertyType,
+        street: properties[0].street,
+        city: properties[0].city,
+      },
+    });
+  }
+
   // Apply price filters in memory since they're not part of the base query
   let filteredProperties = properties;
-  if (params.minPrice !== undefined) {
-    filteredProperties = filteredProperties.filter(p => p.price >= params.minPrice!);
+  if (normalizedParams.minPrice !== undefined) {
+    filteredProperties = filteredProperties.filter(p => p.price >= normalizedParams.minPrice!);
   }
-  if (params.maxPrice !== undefined) {
-    filteredProperties = filteredProperties.filter(p => p.price <= params.maxPrice!);
+  if (normalizedParams.maxPrice !== undefined) {
+    filteredProperties = filteredProperties.filter(p => p.price <= normalizedParams.maxPrice!);
   }
-  if (params.propertyType) {
+  if (normalizedParams.propertyType) {
     filteredProperties = filteredProperties.filter(
-      p => p.propertyType.toLowerCase() === params.propertyType!.toLowerCase()
+      p => p.propertyType.toLowerCase() === normalizedParams.propertyType!.toLowerCase()
     );
   }
 
   // Apply sorting
-  if (params.sortBy) {
-    const sortField = params.sortBy === 'price' ? 'price' : 'date';
-    const sortOrder = params.sortOrder === 'asc' ? 1 : -1;
+  if (normalizedParams.sortBy) {
+    const sortField = normalizedParams.sortBy === 'price' ? 'price' : 'date';
+    const sortOrder = normalizedParams.sortOrder === 'asc' ? 1 : -1;
     filteredProperties.sort((a, b) => {
       if (a[sortField] < b[sortField]) return -1 * sortOrder;
       if (a[sortField] > b[sortField]) return 1 * sortOrder;
@@ -156,8 +240,8 @@ export async function searchProperties(
   }
 
   // Apply pagination
-  const offset = params.offset || 0;
-  const limit = params.limit || 10;
+  const offset = normalizedParams.offset || 0;
+  const limit = normalizedParams.limit || 10;
   const paginatedProperties = filteredProperties.slice(offset, offset + limit);
 
   return {
