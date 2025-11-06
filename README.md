@@ -33,26 +33,37 @@ npm install property-prices-mcp
 
 ## Usage
 
+### As an MCP Server
+
+This server is designed to be used with MCP clients (like Claude Desktop, IDEs with MCP support, etc.). Configure your MCP client to use this server via stdio transport:
+
+```json
+{
+  "mcpServers": {
+    "property-prices": {
+      "command": "property-prices-mcp"
+    }
+  }
+}
+```
+
+Once connected, you can use the `search-property-prices` tool with the following parameters:
+
+```json
+{
+  "postcode": "SW1A 1AA",
+  "minPrice": 1000000,
+  "propertyType": "flat",
+  "limit": 5
+}
+```
+
 ### Command Line Interface
+
+For testing or direct usage:
 
 ```bash
 property-prices-mcp
-```
-
-### As a Library
-
-```typescript
-import { McpClient } from '@modelcontextprotocol/sdk/client';
-
-const client = new McpClient();
-const result = await client.resource('property-prices').query({
-  postcode: 'SW1A 1AA',
-  minPrice: 1000000,
-  propertyType: 'flat',
-  limit: 5,
-});
-
-console.log(result);
 ```
 
 ## Usage Notes

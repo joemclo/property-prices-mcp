@@ -1,6 +1,6 @@
 {
   "name": "property-prices-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Property Price Search MCP Server using TypeScript",
   "main": "dist/index.js",
   "type": "module",
@@ -23,11 +23,9 @@
     "test-mcp": "node dist/test-mcp.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.8.0",
-    "isomorphic-fetch": "^3.0.0",
-    "node-fetch": "^3.3.2",
-    "winston": "^3.17.0",
-    "zod": "^3.22.4"
+    "@modelcontextprotocol/sdk": "^1.21.0",
+    "winston": "^3.18.3",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
