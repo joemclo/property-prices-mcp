@@ -29,6 +29,8 @@ describe('sparqlService', () => {
                   },
                   street: { value: 'Test Street' },
                   town: { value: 'LONDON' },
+                  paon: { value: '10' },
+                  saon: { value: 'Apt 2' },
                 },
               ],
             },
@@ -65,6 +67,8 @@ describe('sparqlService', () => {
         propertyType: { value: 'http://landregistry.data.gov.uk/def/common/flat-maisonette' },
         street: { value: 'Test Street' },
         town: { value: 'LONDON' },
+        paon: { value: '10' },
+        saon: { value: 'Apt 2' },
       });
     });
 
@@ -94,6 +98,8 @@ describe('sparqlService', () => {
         propertyType: { value: 'http://landregistry.data.gov.uk/def/common/flat-maisonette' },
         street: { value: 'Test Street' },
         town: { value: 'LONDON' },
+        paon: { value: '10' },
+        saon: { value: 'Apt 2' },
       };
 
       const result = parsePropertyPrice(binding);
@@ -104,6 +110,8 @@ describe('sparqlService', () => {
         propertyType: 'flat',
         street: 'Test Street',
         city: 'LONDON',
+        paon: '10',
+        saon: 'Apt 2',
       });
     });
 
@@ -191,6 +199,8 @@ describe('sparqlService', () => {
         propertyType: 'flat',
         street: 'Test Street',
         city: 'LONDON',
+        paon: '10',
+        saon: 'Apt 2',
       });
       expect(result.total).toBe(1);
       expect(result.offset).toBe(0);
