@@ -10,6 +10,7 @@ A Model Context Protocol (MCP) server that allows users to search for property p
 - Implements MCP stdio transport for IDE integration
 - TypeScript implementation with full type safety
 - Comprehensive test suite
+- Local postcode lookup & nearest-neighbour tool using Ordnance Survey Code-Point Open (downloaded separately)
 - CLI interface for direct usage
 
 ## Prerequisites
@@ -57,6 +58,23 @@ Once connected, you can use the `search-property-prices` tool with the following
   "limit": 5
 }
 ```
+
+You can also use the `lookup-postcodes` tool (built on Ordnance Survey Code-Point Open) to resolve postcodes and find nearby postcodes:
+
+```json
+{
+  "postcode": "SW1A 1AA",
+  "radiusMeters": 2000,
+  "limit": 5
+}
+```
+
+> Note: The Code-Point Open CSVs are not bundled. Download them once, then build the local postcode database:
+> - `npm run setup:postcodes` (downloads + builds), or
+> - `npm run fetch:codepo` then `npm run build:postcodes`
+>
+> Manual download: https://api.os.uk/downloads/v1/products/CodePointOpen/downloads?area=GB&format=CSV&redirect
+> Contains Ordnance Survey data © Crown copyright and database right, Royal Mail data © Royal Mail copyright and database right, and National Statistics data © Crown copyright and database right.
 
 ### Command Line Interface
 

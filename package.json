@@ -12,6 +12,9 @@
     "typecheck": "tsc --noEmit",
     "start": "node dist/index.js",
     "dev": "ts-node-esm src/index.ts",
+    "fetch:codepo": "node scripts/fetch-codepo.js",
+    "build:postcodes": "node scripts/build-postcodes.js",
+    "setup:postcodes": "npm run fetch:codepo && npm run build:postcodes",
     "test": "jest",
     "test:unit": "jest src/__tests__/unit",
     "test:e2e": "RUN_E2E_TESTS=true jest src/__tests__/e2e",
@@ -26,11 +29,13 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
+    "better-sqlite3": "^11.10.0",
     "winston": "^3.18.3",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
