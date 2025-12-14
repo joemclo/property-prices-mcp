@@ -16,6 +16,7 @@ const server = new McpServer({
 // Configure the property prices search tool
 server.tool(
   'search-property-prices',
+  'Search HM Land Registry price-paid data. Provide either `postcode` or both `street` and `city` (case-insensitive; uppercased for the query). Optional filters: `minPrice`/`maxPrice` (GBP), `propertyType` (detached | semi-detached | terraced | flat | other), `fromDate`/`toDate` (YYYY-MM-DD), `limit`/`offset` (pagination), `sortBy` (date | price), `sortOrder` (asc | desc). Returns JSON: `{ properties: [{ price, date, postcode, propertyType, street, city, paon?, saon? }], total, offset, limit }`, where `paon` is the Primary Addressable Object Name (e.g., house number/name) and `saon` is the Secondary Addressable Object Name (e.g., flat/unit/apartment).',
   {
     postcode: z.string().optional(),
     street: z.string().optional(),
