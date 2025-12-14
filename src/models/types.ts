@@ -33,6 +33,8 @@ export interface PropertyPrice {
   propertyType: PropertyType;
   street: string;
   city: string;
+  paon?: string;
+  saon?: string;
 }
 
 export interface SearchResponse {

@@ -105,21 +105,16 @@ The API returns results in the following format:
 interface PropertyPrice {
   price: number;
   date: string;
-  propertyType: string;
-  newBuild: boolean;
-  tenure: string;
-  paon: string;
-  saon?: string;
-  street: string;
-  locality?: string;
-  town: string;
-  district: string;
-  county: string;
   postcode: string;
+  propertyType: 'detached' | 'semi-detached' | 'terraced' | 'flat' | 'other';
+  street: string;
+  city: string;
+  paon?: string;
+  saon?: string;
 }
 
 interface SearchResponse {
-  results: PropertyPrice[];
+  properties: PropertyPrice[];
   total: number;
   offset: number;
   limit: number;

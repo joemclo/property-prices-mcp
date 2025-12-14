@@ -127,6 +127,8 @@ export function parsePropertyPrice(binding: SparqlBinding): PropertyPrice {
     propertyType: mapPropertyType(binding.propertyType.value),
     street: binding.street?.value || '',
     city: binding.town?.value || '',
+    paon: binding.paon?.value,
+    saon: binding.saon?.value,
   };
 }
 
@@ -209,6 +211,8 @@ export async function searchProperties(
         propertyType: properties[0].propertyType,
         street: properties[0].street,
         city: properties[0].city,
+        paon: properties[0].paon,
+        saon: properties[0].saon,
       },
     });
   }
