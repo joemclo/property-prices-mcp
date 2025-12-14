@@ -4,7 +4,9 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { searchProperties } from './services/sparqlService.js';
+import { lookupPostcodes } from './services/postcodeService.js';
 import { logInfo, logError, logMcpRequest, logMcpResponse, logMcpError } from './utils/logger.js';
+import { PostcodeLookupParamsSchema } from './models/postcodes.js';
 
 const LAND_REGISTRY_ENDPOINT = 'https://landregistry.data.gov.uk/landregistry/query';
 
@@ -92,6 +94,77 @@ server.tool(
               {
                 error: error instanceof Error ? error.message : String(error),
               },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  }
+);
+
+// Postcode lookup and nearest-neighbour tool backed by the Code-Point Open dataset
+server.tool(
+  'lookup-postcodes',
+  'Look up UK postcodes (Code-Point Open) and find nearest neighbours using OSGB36 eastings/northings. Provide either `postcode` or both `easting` and `northing` as the center. Optional: `radiusMeters` (meters), `limit` (default 10), `includeSelf` (default false), `adminDistrict` filter. Returns `{ center, postcodes: [{ postcode, easting, northing, positionalQuality, countryCode, adminDistrictCode, distanceMeters }], total }`. Requires a local database built from the bundled `codepo_gb` CSVs via `npm run build:postcodes`.',
+  {
+    postcode: z.string().optional(),
+    easting: z.number().optional(),
+    northing: z.number().optional(),
+    limit: z.number().int().positive().max(500).optional(),
+    radiusMeters: z.number().positive().max(200000).optional(),
+    includeSelf: z.boolean().optional(),
+    adminDistrict: z.string().optional(),
+  },
+  async rawParams => {
+    const startTime = Date.now();
+    let responseStatus = 200;
+    try {
+      logMcpRequest('MCP tool invoked: lookup-postcodes', {
+        toolName: 'lookup-postcodes',
+        params: rawParams,
+      });
+
+      const params = PostcodeLookupParamsSchema.parse(rawParams);
+      const result = lookupPostcodes(params);
+
+      const responseTime = Date.now() - startTime;
+      logMcpResponse('MCP tool completed: lookup-postcodes', {
+        toolName: 'lookup-postcodes',
+        params,
+        responseStatus,
+        responseTime,
+        resultCount: result.postcodes.length,
+        totalResults: result.total,
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      responseStatus = 500;
+      const responseTime = Date.now() - startTime;
+
+      logMcpError('MCP tool failed: lookup-postcodes', {
+        toolName: 'lookup-postcodes',
+        params: rawParams,
+        responseStatus,
+        responseTime,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              { error: error instanceof Error ? error.message : String(error) },
               null,
               2
             ),

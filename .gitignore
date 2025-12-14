@@ -53,6 +53,17 @@ yarn-error.log*
 logs
 *.log
 
+# Generated postcode database
+data/postcodes.sqlite
+data/postcodes.sqlite-*
+
+# Downloaded Code-Point Open dataset
+codepo_gb/
+
+# Local scratch files
+tmp_*.js
+tmp/
+
 # Optional npm cache directory
 .npm
 
