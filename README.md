@@ -33,26 +33,37 @@ npm install property-prices-mcp
 
 ## Usage
 
+### As an MCP Server
+
+This server is designed to be used with MCP clients (like Claude Desktop, IDEs with MCP support, etc.). Configure your MCP client to use this server via stdio transport:
+
+```json
+{
+  "mcpServers": {
+    "property-prices": {
+      "command": "property-prices-mcp"
+    }
+  }
+}
+```
+
+Once connected, you can use the `search-property-prices` tool with the following parameters:
+
+```json
+{
+  "postcode": "SW1A 1AA",
+  "minPrice": 1000000,
+  "propertyType": "flat",
+  "limit": 5
+}
+```
+
 ### Command Line Interface
+
+For testing or direct usage:
 
 ```bash
 property-prices-mcp
-```
-
-### As a Library
-
-```typescript
-import { McpClient } from '@modelcontextprotocol/sdk/client';
-
-const client = new McpClient();
-const result = await client.resource('property-prices').query({
-  postcode: 'SW1A 1AA',
-  minPrice: 1000000,
-  propertyType: 'flat',
-  limit: 5,
-});
-
-console.log(result);
 ```
 
 ## Usage Notes
@@ -156,15 +167,63 @@ Error responses include a message explaining the error:
 4. Run tests:
 
    ```bash
-   npm test                  # Run all tests
+   npm test                  # Run unit tests (fast, mocked)
    npm run test:unit        # Run unit tests only
-   npm run test:integration # Run integration tests only
+   npm run test:e2e         # Run e2e tests (requires internet, hits real API)
+   npm run test:all         # Run all tests including e2e
    ```
+
+   **Note**: E2E tests make real API calls to the HM Land Registry SPARQL endpoint and are skipped by default. They require internet connectivity and may fail in sandboxed environments.
 
 5. Start in development mode:
    ```bash
    npm run dev
    ```
+
+## Testing
+
+This project uses a three-tier testing approach:
+
+### Test Structure
+
+```
+src/__tests__/
+├── unit/              # Unit tests (fast, all mocked)
+│   ├── queries.test.ts
+│   ├── sparqlService.test.ts
+│   └── mcpTool.test.ts
+└── e2e/               # End-to-end tests (slow, real API calls)
+    └── propertySearch.e2e.test.ts
+```
+
+### Running Tests
+
+- **Unit tests** (default): Fast tests with mocked dependencies
+  ```bash
+  npm test           # or npm run test:unit
+  ```
+
+- **E2E tests**: Real API calls to HM Land Registry
+  ```bash
+  npm run test:e2e
+  ```
+
+  Note: E2E tests are skipped by default and require:
+  - Internet connectivity
+  - Access to https://landregistry.data.gov.uk
+  - Setting `RUN_E2E_TESTS=true` environment variable
+
+- **All tests**: Run both unit and e2e tests
+  ```bash
+  npm run test:all
+  ```
+
+### Manual Testing
+
+For ad-hoc testing with real data:
+```bash
+npm run test-mcp
+```
 
 ## Troubleshooting
 

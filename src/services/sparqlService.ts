@@ -1,7 +1,6 @@
-import 'isomorphic-fetch';
 import { SearchParams, SearchResponse, PropertyPrice, PropertyType } from '../models/types.js';
 import { getPostcodeQuery, getAddressQuery, addDateFilters } from '../queries/queries.js';
-import { logSparqlRequest, logSparqlResponse, logSparqlError, logInfo } from '../utils/logger.js';
+import { logSparqlRequest, logSparqlResponse, logSparqlError, logInfo, logWarn } from '../utils/logger.js';
 
 interface SparqlBinding {
   amount?: { value: string };
@@ -111,7 +110,7 @@ function mapPropertyType(propertyTypeUri: string): PropertyType {
 
   const mappedType = uriToType[propertyTypeUri];
   if (!mappedType) {
-    console.warn(`Unknown property type URI: ${propertyTypeUri}, defaulting to 'other'`);
+    logWarn('Unknown property type URI, defaulting to "other"', { propertyTypeUri });
   }
   return mappedType || 'other';
 }

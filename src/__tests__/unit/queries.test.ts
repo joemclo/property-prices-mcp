@@ -11,14 +11,14 @@ describe('queries', () => {
       expect(query).toContain(
         'SELECT ?amount ?date ?paon ?saon ?street ?town ?county ?postcode ?propertyType ?estateType ?newBuild ?category'
       );
-      expect(query).toContain('?addr lrcommon:postcode "PL6 8RU"');
+      expect(query).toContain('VALUES ?postcode {"PL6 8RU"^^xsd:string}');
       expect(query).toContain('ORDER BY DESC(?date)');
       expect(query).toContain('LIMIT 100');
     });
 
     it('should escape special characters in postcode', () => {
       const query = getPostcodeQuery('PL6 8RU"');
-      expect(query).toContain('?addr lrcommon:postcode "PL6 8RU\\""');
+      expect(query).toContain('VALUES ?postcode {"PL6 8RU\\""^^xsd:string}');
     });
   });
 
@@ -32,8 +32,8 @@ describe('queries', () => {
       expect(query).toContain(
         'SELECT ?paon ?saon ?street ?town ?county ?postcode ?amount ?date ?category ?propertyType ?estateType ?newBuild'
       );
-      expect(query).toContain('lrcommon:street "charlton ROAD"^^xsd:string');
-      expect(query).toContain('lrcommon:town "HARROW"^^xsd:string');
+      expect(query).toContain('VALUES ?street {"charlton ROAD"^^xsd:string}');
+      expect(query).toContain('VALUES ?town {"HARROW"^^xsd:string}');
       expect(query).toContain('ORDER BY DESC(?date)');
       expect(query).toContain('LIMIT 100');
     });
@@ -50,7 +50,7 @@ describe('queries', () => {
 
     it('should escape special characters in address fields', () => {
       const query = getAddressQuery('charlton "ROAD"', 'HARROW');
-      expect(query).toContain('lrcommon:street "charlton \\"ROAD\\""^^xsd:string');
+      expect(query).toContain('VALUES ?street {"charlton \\"ROAD\\""^^xsd:string}');
     });
   });
 
