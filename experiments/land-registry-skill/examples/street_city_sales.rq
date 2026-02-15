@@ -1,0 +1,25 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX lrppi: <http://landregistry.data.gov.uk/def/ppi/>
+PREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?amount ?date ?paon ?saon ?street ?town ?postcode ?propertyType
+WHERE {
+  VALUES ?street {"HILLSIDE AVENUE"^^xsd:string}
+  VALUES ?town {"CANTERBURY"^^xsd:string}
+
+  ?addr lrcommon:street ?street ;
+        lrcommon:town ?town .
+
+  ?transx lrppi:propertyAddress ?addr ;
+          lrppi:pricePaid ?amount ;
+          lrppi:transactionDate ?date ;
+          lrppi:propertyType ?propertyType ;
+          lrppi:transactionCategory/skos:prefLabel ?category .
+
+  OPTIONAL { ?addr lrcommon:paon ?paon }
+  OPTIONAL { ?addr lrcommon:saon ?saon }
+  OPTIONAL { ?addr lrcommon:postcode ?postcode }
+}
+ORDER BY DESC(?date)
+LIMIT 10
