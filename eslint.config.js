@@ -5,16 +5,25 @@ import prettier from 'eslint-plugin-prettier';
 import globals from 'globals';
 
 export default [
+  {
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'coverage/**',
+      '.git/**',
+      'src/types/rdf/**/*.generated.ts',
+    ],
+  },
   eslint.configs.recommended,
   {
     files: ['src/**/*.ts'],
-    ignores: ['**/*.d.ts'],
+    ignores: ['**/*.d.ts', 'src/types/rdf/**/*.generated.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
       parser: tseslintParser,
       parserOptions: {
-        project: './tsconfig.json',
+        project: './tsconfig.eslint.json',
       },
       globals: {
         ...globals.node,
@@ -53,6 +62,9 @@ export default [
   {
     files: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     languageOptions: {
+      parserOptions: {
+        project: './tsconfig.eslint.json',
+      },
       globals: {
         ...globals.jest,
       },

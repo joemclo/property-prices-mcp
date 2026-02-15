@@ -1,6 +1,12 @@
 import { SearchParams, SearchResponse, PropertyPrice, PropertyType } from '../models/types.js';
 import { getPostcodeQuery, getAddressQuery, addDateFilters } from '../queries/queries.js';
-import { logSparqlRequest, logSparqlResponse, logSparqlError, logInfo, logWarn } from '../utils/logger.js';
+import {
+  logSparqlRequest,
+  logSparqlResponse,
+  logSparqlError,
+  logInfo,
+  logWarn,
+} from '../utils/logger.js';
 
 interface SparqlBinding {
   amount?: { value: string };

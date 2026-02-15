@@ -28,7 +28,8 @@ export const PostcodeLookupParamsSchema = z
     adminDistrict: z.string().optional(),
   })
   .refine(
-    data => data.postcode || (typeof data.easting === 'number' && typeof data.northing === 'number'),
+    data =>
+      data.postcode || (typeof data.easting === 'number' && typeof data.northing === 'number'),
     { message: 'Provide a postcode or both easting and northing' }
   );
 

@@ -42,5 +42,5 @@ export type {
   RecordStatusConcept,
   Transaction,
   TransactionRecord,
-  TransactionCategory
+  TransactionCategory,
 } from './combined.generated';

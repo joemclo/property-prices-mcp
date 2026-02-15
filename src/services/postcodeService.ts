@@ -1,11 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Database from 'better-sqlite3';
-import {
-  PostcodeLookupParams,
-  PostcodeRecord,
-  PostcodeDistance,
-} from '../models/postcodes.js';
+import { PostcodeLookupParams, PostcodeRecord, PostcodeDistance } from '../models/postcodes.js';
 import { logInfo } from '../utils/logger.js';
 
 const DEFAULT_DB_PATH = path.join(process.cwd(), 'data', 'postcodes.sqlite');
@@ -159,7 +155,11 @@ export function lookupPostcodes(
       return { ...record, distanceMeters };
     })
     .filter(record => {
-      if (!includeSelf && params.postcode && record.postcode === normalizePostcode(params.postcode)) {
+      if (
+        !includeSelf &&
+        params.postcode &&
+        record.postcode === normalizePostcode(params.postcode)
+      ) {
         return false;
       }
       if (params.radiusMeters !== undefined && record.distanceMeters > params.radiusMeters) {

@@ -2,7 +2,7 @@
 
 This project exposes a Model Context Protocol (MCP) server that lets agents search UK HM Land Registry price-paid data.
 
-- **Prereqs**: Node.js >= 18, npm >= 7.
+- **Prereqs**: Node.js >= 20, npm >= 7.
 - **How to run**: build with `npm run build`, then start the MCP server via `property-prices-mcp` (bin) or `node dist/index.js`. In development you can run `npm run dev` to start via ts-node; `npm run start` runs the compiled server.
 - **MCP config**: register a server named `property-prices` with `command: "property-prices-mcp"` (or `"node"`, `args: ["./dist/index.js"]`). Transport is stdio only.
 - **Available tools**:
