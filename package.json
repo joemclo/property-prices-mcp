@@ -7,6 +7,13 @@
   "bin": {
     "property-prices-mcp": "./dist/index.js"
   },
+  "files": [
+    "dist/**",
+    "scripts/**",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "node build.js",
     "typecheck": "tsc --noEmit",
@@ -28,31 +35,31 @@
     "test-mcp": "node dist/test-mcp.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "better-sqlite3": "^11.10.0",
-    "winston": "^3.18.3",
-    "zod": "^3.24.1"
+    "winston": "^3.19.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.19",
-    "@typescript-eslint/eslint-plugin": "^8.29.0",
-    "@typescript-eslint/parser": "^8.29.0",
-    "esbuild": "^0.27.1",
-    "eslint": "^9.23.0",
-    "eslint-config-prettier": "^10.1.1",
-    "eslint-plugin-prettier": "^5.2.6",
-    "glob": "^13.0.0",
-    "globals": "^16.0.0",
+    "@types/node": "^20.19.33",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
+    "esbuild": "^0.27.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "glob": "^13.0.3",
+    "globals": "^16.5.0",
     "jest": "^29.7.0",
-    "prettier": "^3.5.3",
-    "ts-jest": "^29.1.2",
+    "prettier": "^3.8.1",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }

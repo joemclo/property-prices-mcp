@@ -1,11 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Database from 'better-sqlite3';
-import {
-  PostcodeLookupParams,
-  PostcodeRecord,
-  PostcodeDistance,
-} from '../models/postcodes.js';
+import { PostcodeLookupParams, PostcodeRecord, PostcodeDistance } from '../models/postcodes.js';
 import { logInfo } from '../utils/logger.js';
 
 const DEFAULT_DB_PATH = path.join(process.cwd(), 'data', 'postcodes.sqlite');
@@ -14,6 +10,19 @@ const MAX_RADIUS = 200000; // safeguard to avoid runaway expansion (200km)
 
 let dbInstance: Database.Database | null = null;
 let dbPathInUse: string | null = null;
+
+interface PostcodeRow {
+  postcode: string;
+  positional_quality: number;
+  easting: number;
+  northing: number;
+  country_code: string;
+  nhs_regional_ha_code: string;
+  nhs_ha_code: string;
+  admin_county_code: string;
+  admin_district_code: string;
+  admin_ward_code: string;
+}
 
 function resolveDbPath(customPath?: string): string {
   return path.resolve(customPath || process.env.POSTCODE_DB_PATH || DEFAULT_DB_PATH);
@@ -41,7 +50,7 @@ function normalizePostcode(postcode: string): string {
   return postcode.trim().toUpperCase();
 }
 
-function mapRow(row: any): PostcodeRecord {
+function mapRow(row: PostcodeRow): PostcodeRecord {
   return {
     postcode: row.postcode,
     positionalQuality: row.positional_quality,
@@ -68,7 +77,7 @@ export function getPostcodeRecord(
               nhs_ha_code, admin_county_code, admin_district_code, admin_ward_code
        FROM postcodes WHERE postcode = ?`
     )
-    .get(normalized);
+    .get(normalized) as PostcodeRow | undefined;
 
   return row ? mapRow(row) : null;
 }
@@ -100,7 +109,7 @@ function queryByRadius(
     ? [minX, maxX, minY, maxY, adminDistrict, limit]
     : [minX, maxX, minY, maxY, limit];
 
-  const rows = db.prepare(sql).all(...params);
+  const rows = db.prepare(sql).all(...params) as PostcodeRow[];
   return rows.map(mapRow);
 }
 
@@ -159,7 +168,11 @@ export function lookupPostcodes(
       return { ...record, distanceMeters };
     })
     .filter(record => {
-      if (!includeSelf && params.postcode && record.postcode === normalizePostcode(params.postcode)) {
+      if (
+        !includeSelf &&
+        params.postcode &&
+        record.postcode === normalizePostcode(params.postcode)
+      ) {
         return false;
       }
       if (params.radiusMeters !== undefined && record.distanceMeters > params.radiusMeters) {

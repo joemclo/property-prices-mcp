@@ -15,25 +15,60 @@ const server = new McpServer({
   version: '1.0.0',
 });
 
+const searchPropertyPricesInputSchema: z.ZodTypeAny = z.object({
+  postcode: z.string().optional(),
+  street: z.string().optional(),
+  city: z.string().optional(),
+  minPrice: z.number().optional(),
+  maxPrice: z.number().optional(),
+  propertyType: z.enum(['detached', 'semi-detached', 'terraced', 'flat', 'other']).optional(),
+  fromDate: z.string().optional(),
+  toDate: z.string().optional(),
+  limit: z.number().optional(),
+  offset: z.number().optional(),
+  sortBy: z.enum(['date', 'price']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+});
+
+const lookupPostcodesInputSchema: z.ZodTypeAny = z.object({
+  postcode: z.string().optional(),
+  easting: z.number().optional(),
+  northing: z.number().optional(),
+  limit: z.number().int().positive().max(500).optional(),
+  radiusMeters: z.number().positive().max(200000).optional(),
+  includeSelf: z.boolean().optional(),
+  adminDistrict: z.string().optional(),
+});
+
+type ToolResponse = {
+  content: Array<{
+    type: 'text';
+    text: string;
+  }>;
+};
+
+type RegisterToolCompat = {
+  registerTool: (
+    name: string,
+    config: {
+      description: string;
+      inputSchema: z.ZodTypeAny;
+    },
+    cb: (params: Record<string, unknown>) => Promise<ToolResponse>
+  ) => unknown;
+};
+
+const registerTool = (server as unknown as RegisterToolCompat).registerTool.bind(server);
+
 // Configure the property prices search tool
-server.tool(
+registerTool(
   'search-property-prices',
-  'Search HM Land Registry price-paid data. Provide either `postcode` or both `street` and `city` (case-insensitive; uppercased for the query). Optional filters: `minPrice`/`maxPrice` (GBP), `propertyType` (detached | semi-detached | terraced | flat | other), `fromDate`/`toDate` (YYYY-MM-DD), `limit`/`offset` (pagination), `sortBy` (date | price), `sortOrder` (asc | desc). Returns JSON: `{ properties: [{ price, date, postcode, propertyType, street, city, paon?, saon? }], total, offset, limit }`, where `paon` is the Primary Addressable Object Name (e.g., house number/name) and `saon` is the Secondary Addressable Object Name (e.g., flat/unit/apartment).',
   {
-    postcode: z.string().optional(),
-    street: z.string().optional(),
-    city: z.string().optional(),
-    minPrice: z.number().optional(),
-    maxPrice: z.number().optional(),
-    propertyType: z.enum(['detached', 'semi-detached', 'terraced', 'flat', 'other']).optional(),
-    fromDate: z.string().optional(),
-    toDate: z.string().optional(),
-    limit: z.number().optional(),
-    offset: z.number().optional(),
-    sortBy: z.enum(['date', 'price']).optional(),
-    sortOrder: z.enum(['asc', 'desc']).optional(),
+    description:
+      'Search HM Land Registry price-paid data. Provide either `postcode` or both `street` and `city` (case-insensitive; uppercased for the query). Optional filters: `minPrice`/`maxPrice` (GBP), `propertyType` (detached | semi-detached | terraced | flat | other), `fromDate`/`toDate` (YYYY-MM-DD), `limit`/`offset` (pagination), `sortBy` (date | price), `sortOrder` (asc | desc). Returns JSON: `{ properties: [{ price, date, postcode, propertyType, street, city, paon?, saon? }], total, offset, limit }`, where `paon` is the Primary Addressable Object Name (e.g., house number/name) and `saon` is the Secondary Addressable Object Name (e.g., flat/unit/apartment).',
+    inputSchema: searchPropertyPricesInputSchema,
   },
-  async params => {
+  async (params: Record<string, unknown>) => {
     const startTime = Date.now();
     let responseStatus = 200;
 
@@ -105,19 +140,14 @@ server.tool(
 );
 
 // Postcode lookup and nearest-neighbour tool backed by the Code-Point Open dataset
-server.tool(
+registerTool(
   'lookup-postcodes',
-  'Look up UK postcodes (Code-Point Open) and find nearest neighbours using OSGB36 eastings/northings. Provide either `postcode` or both `easting` and `northing` as the center. Optional: `radiusMeters` (meters), `limit` (default 10), `includeSelf` (default false), `adminDistrict` filter. Returns `{ center, postcodes: [{ postcode, easting, northing, positionalQuality, countryCode, adminDistrictCode, distanceMeters }], total }`. Requires a local database built from the bundled `codepo_gb` CSVs via `npm run build:postcodes`.',
   {
-    postcode: z.string().optional(),
-    easting: z.number().optional(),
-    northing: z.number().optional(),
-    limit: z.number().int().positive().max(500).optional(),
-    radiusMeters: z.number().positive().max(200000).optional(),
-    includeSelf: z.boolean().optional(),
-    adminDistrict: z.string().optional(),
+    description:
+      'Look up UK postcodes (Code-Point Open) and find nearest neighbours using OSGB36 eastings/northings. Provide either `postcode` or both `easting` and `northing` as the center. Optional: `radiusMeters` (meters), `limit` (default 10), `includeSelf` (default false), `adminDistrict` filter. Returns `{ center, postcodes: [{ postcode, easting, northing, positionalQuality, countryCode, adminDistrictCode, distanceMeters }], total }`. Requires a local database built from the bundled `codepo_gb` CSVs via `npm run build:postcodes`.',
+    inputSchema: lookupPostcodesInputSchema,
   },
-  async rawParams => {
+  async (rawParams: Record<string, unknown>) => {
     const startTime = Date.now();
     let responseStatus = 200;
     try {

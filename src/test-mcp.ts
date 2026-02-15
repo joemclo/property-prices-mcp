@@ -1,11 +1,12 @@
 import { searchProperties } from './services/sparqlService.js';
+import { SearchParams, SearchResponse } from './models/types.js';
 
 const LAND_REGISTRY_ENDPOINT = 'https://landregistry.data.gov.uk/landregistry/query';
 
 interface TestCase {
   name: string;
-  params: any;
-  validate: (result: any) => string[];
+  params: SearchParams;
+  validate: (result: SearchResponse) => string[];
   debug?: boolean;
 }
 
@@ -21,7 +22,7 @@ const TEST_CASES: TestCase[] = [
       if (!result.properties || result.properties.length === 0) {
         errors.push('No properties found');
       }
-      if (!result.properties?.every((p: any) => p.street === 'PATTINSON DRIVE')) {
+      if (!result.properties?.every(p => p.street === 'PATTINSON DRIVE')) {
         errors.push('Not all properties are on Pattinson Drive');
       }
       return errors;
@@ -52,7 +53,7 @@ const TEST_CASES: TestCase[] = [
     },
     validate: result => {
       const errors = [];
-      if (!result.properties?.every((p: any) => p.propertyType === 'flat')) {
+      if (!result.properties?.every(p => p.propertyType === 'flat')) {
         errors.push('Non-flat properties found in results');
       }
       return errors;
@@ -69,7 +70,7 @@ const TEST_CASES: TestCase[] = [
     },
     validate: result => {
       const errors = [];
-      if (!result.properties?.every((p: any) => p.price >= 300000 && p.price <= 500000)) {
+      if (!result.properties?.every(p => p.price >= 300000 && p.price <= 500000)) {
         errors.push('Properties outside price range found');
       }
       return errors;
@@ -87,7 +88,7 @@ const TEST_CASES: TestCase[] = [
     validate: result => {
       const errors = [];
       if (
-        !result.properties?.every((p: any) => {
+        !result.properties?.every(p => {
           const date = new Date(p.date);
           console.log('Property date:', p.date, 'parsed as:', date);
           return date >= new Date('2023-01-01') && date <= new Date('2023-12-31');
@@ -110,7 +111,7 @@ const TEST_CASES: TestCase[] = [
     },
     validate: result => {
       const errors = [];
-      const prices = result.properties?.map((p: any) => p.price);
+      const prices = result.properties?.map(p => p.price);
       const sortedPrices = [...prices].sort((a, b) => b - a);
       if (JSON.stringify(prices) !== JSON.stringify(sortedPrices)) {
         errors.push('Results not properly sorted by price descending');
@@ -151,7 +152,7 @@ const TEST_CASES: TestCase[] = [
       const errors = [];
       if (
         !result.properties?.every(
-          (p: any) =>
+          p =>
             p.propertyType === 'flat' &&
             p.price >= 300000 &&
             p.price <= 500000 &&
@@ -213,8 +214,9 @@ async function runTests() {
         console.log();
         failCount++;
       }
-    } catch (error: any) {
-      console.log('❌ Test failed with error:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log('❌ Test failed with error:', message);
       console.log();
       failCount++;
     }

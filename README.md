@@ -15,7 +15,7 @@ A Model Context Protocol (MCP) server that allows users to search for property p
 
 ## Prerequisites
 
-- Node.js >= 18
+- Node.js >= 20
 - npm >= 7
 
 ## Installation

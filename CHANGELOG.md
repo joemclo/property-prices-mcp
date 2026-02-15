@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Upgraded `@modelcontextprotocol/sdk` to `1.26.0` and migrated tool registration to `registerTool` for compatibility with newer SDK typings.
+- Updated development dependencies to current patch/minor releases (TypeScript, ESLint, Prettier, ts-jest, and related tooling).
+- Raised minimum supported Node.js version from 18 to 20.
+- Added a `files` allowlist in `package.json` to reduce published package contents.
+
+### Fixed
+
+- Fixed ESLint type-aware parsing for test files by introducing `tsconfig.eslint.json`.
+- Moved ignore rules into flat ESLint config and removed deprecated `.eslintignore`.
+- Excluded generated RDF TypeScript files from linting noise.
+
 ## [1.1.0] - 2025-12-12
 
 ### Changed
